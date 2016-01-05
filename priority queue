@@ -1,0 +1,127 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Copy_the_N_puzzle
+{
+    class PaiortyQueue
+    {
+        SortedDictionary<long, SortedDictionary<string , NODE>> MainOPenList;
+        SortedDictionary<string, NODE> SearchOpenList;
+        public PaiortyQueue()
+        {
+            MainOPenList = new SortedDictionary<long, SortedDictionary<string, NODE>>();
+            SearchOpenList = new SortedDictionary<string, NODE>();
+        }
+        public int opendlistsize()
+        {
+            return SearchOpenList.Count;
+        }
+        public bool check_if_equl(int[,] arr, int[,] arr2, int s)
+        {
+            for (int i = 0; i < s; i++)
+            {
+                for (int j = 0; j < s; j++) 
+                {
+                    if (arr[i, j] != arr2[i, j])
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        public void push(NODE n)
+        {
+            string key = GenerateAKEy(n.PUZZLE, n.PuzzleSIze);
+            if (SearchOpenList.ContainsKey(key))
+            {
+                NODE current = new NODE();
+                SearchOpenList.TryGetValue(key, out current);
+                if (n.TOTAL < current.TOTAL)
+                {
+                    SearchOpenList.Remove(key);
+                    SearchOpenList.Add(key, n);
+
+                    SortedDictionary<string, NODE> CurentMain = new SortedDictionary<string, NODE>();
+                    MainOPenList.TryGetValue(current.TOTAL, out CurentMain);
+
+                    string RemoveKey = GenerateAKEy(n.PUZZLE , n.PuzzleSIze);
+                    CurentMain.Remove(RemoveKey);
+
+                    MainOPenList.Remove(current.TOTAL);
+                    if (CurentMain.Count != 0)
+                    {
+                        MainOPenList.Add(current.TOTAL, CurentMain);
+                    }
+                    AddNew(n, n.TOTAL);
+                    return;
+                }
+                else
+                    return;
+            }
+            SearchOpenList.Add(key, n);
+            AddNew(n, n.TOTAL);
+
+        }
+        public void AddNew(NODE newnode, long key)
+        {
+            string NewKey = GenerateAKEy(newnode.PUZZLE, newnode.PuzzleSIze);
+            if (MainOPenList.ContainsKey(key))
+            {
+                SortedDictionary<string, NODE> N = new SortedDictionary<string, NODE>();
+                MainOPenList.TryGetValue(key, out N);
+                
+                N.Add(NewKey, newnode);
+
+                MainOPenList.Remove(key);
+                MainOPenList.Add(key, N);
+
+            }
+            else
+            {
+                SortedDictionary<string, NODE> N = new SortedDictionary<string, NODE>();
+                N.Add(NewKey , newnode);
+                MainOPenList.Add(key , N);
+            }
+        }
+        public NODE POP()
+        {
+            NODE N = new NODE();
+            long key = MainOPenList.Keys.Min();
+            SortedDictionary<string, NODE> LIST = new SortedDictionary<string, NODE>();
+            MainOPenList.TryGetValue(key, out LIST);
+            N.EQUAL(LIST.First().Value);
+            string arrayKey = GenerateAKEy(N.PUZZLE, N.PuzzleSIze);
+            if (LIST.Count == 1)
+            {
+                SearchOpenList.Remove(arrayKey);
+                MainOPenList.Remove(key);
+            }
+            else if (LIST.Count > 1)
+            {
+                LIST.Remove(arrayKey);
+                SearchOpenList.Remove(arrayKey);
+                MainOPenList.Remove(key);
+                MainOPenList.Add(key, LIST);
+            }
+
+            return N;
+        }
+
+        public string GenerateAKEy(int[,] ARRMAIN, int size)
+        {
+            string temp = "";
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    temp += ARRMAIN[i, j].ToString();
+                }
+            }
+            return temp;
+        }
+
+    }
+}
