@@ -1,0 +1,408 @@
+using MetroFramework;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Copy_the_N_puzzle
+{
+    public partial class Form1 : MetroFramework.Forms.MetroForm
+    {
+        int c = 0;
+        static int count_Random = 0;
+        AstarAlogrithm O = new AstarAlogrithm();
+        string[] Path;
+        public int size = -1;
+        static int zero_row, zero_col, Path_lenght, index = 0;
+        int n = 5;
+        int z = 5; 
+        Timer TimerBlankUp, TimerBlankDown, TimerBlankRight, TimerBlankLeft;
+        int[,] arr;
+        static string move;
+        static string path_Display;
+        Button[,] Array_Buttons;
+        string Previous;
+        static string[] separators = { "(", ")", "," };
+        bool enter = true;
+        static int Button_size_wed; 
+        static int Button_size_hei; 
+        static int Avg_size;
+        static int Button_Font_size;
+        static int Puzzel_padding_top = 5 ;
+        static int Puzzel_padding_left;
+        static int time_interval_to_move = 4;
+        static int inc_dec_value;
+        FirstForm ThisWillClosed;
+        public Form1()
+        {
+            
+            InitializeComponent();
+            
+        }
+        public Form1(FirstForm FF)
+        {
+            InitializeComponent();
+            ThisWillClosed = FF;
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            metroPanel1.Visible = false;
+            metroPanel2.Visible = false;
+            PuzzelPanal.Visible = false;
+            Start_Solving.Visible = false;
+            Get_Path.Visible = false;
+            Random.Visible = false;
+            metroTile1.Visible = false;
+            timer1.Start();
+        }
+        
+        static void Swap<T>(ref T lhs, ref T rhs)
+        {
+            T temp;
+            temp = lhs;
+            lhs = rhs;
+            rhs = temp;
+        }
+        public void DoIt()
+        {
+            while (enter == true && index < Path_lenght)
+            {
+                string element = Path[index];
+                string[] Splitting = element.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                move = Splitting[0];
+                if (move == "DOWN") { InitTimer_For_BlankDown(); }
+                else if (move == "UP") { InitTimer_For_BlankUp(); }
+                else if (move == "LEFT") { InitTimer_For_BlankLeft(); }
+                else { InitTimer_For_BlankRight(); }
+                enter = false;
+
+                index++;
+            }
+
+            if (index == Path_lenght)
+            {
+                if ((TimerBlankUp == null || TimerBlankUp.Enabled == false) && (TimerBlankDown == null || TimerBlankDown.Enabled == false) && (TimerBlankRight == null || TimerBlankRight.Enabled == false) && (TimerBlankLeft == null || TimerBlankLeft.Enabled == false))
+                {
+                    for (int i = 0; i < size; i++)
+                    {
+                        for (int j = 0; j < size; j++)
+                        {
+                            Array_Buttons[i, j].ForeColor = Color.FromArgb(51, 204, 0);
+                        }
+                    }
+                    Start_Solving.Text = "Solving Complete..";
+                    Random.Enabled = true;
+                }
+                
+            }
+
+        }
+        private void TimerBlankUp_Tick(object sender, EventArgs e)
+        {
+            Button Working_buton = Array_Buttons[zero_row + 1, zero_col];
+            Working_buton.Location = new Point(Working_buton.Location.X, Working_buton.Location.Y - inc_dec_value);
+            if (Working_buton.Location.Y == zero_row * Button_size_wed + Puzzel_padding_top)
+            {
+                Working_buton.ForeColor = Color.FromArgb(51, 153, 255);
+                Swap<Button>(ref Working_buton, ref Array_Buttons[zero_row, zero_col]);
+                zero_row += 1;
+                TimerBlankUp.Stop();
+                enter = true;
+                DoIt();
+            }
+        }
+        public void InitTimer_For_BlankUp()
+        {
+            Array_Buttons[zero_row + 1, zero_col].ForeColor = Color.FromArgb(230, 0, 0);
+            TimerBlankUp = new Timer();
+            TimerBlankUp.Tick += new EventHandler(TimerBlankUp_Tick);
+            TimerBlankUp.Interval = time_interval_to_move; // in miliseconds
+            TimerBlankUp.Start();
+        }
+
+
+
+        private void TimerBlankDown_Tick(object sender, EventArgs e)
+        {
+            Button Working_buton = Array_Buttons[zero_row - 1, zero_col];
+            Working_buton.Location = new Point(Working_buton.Location.X, Working_buton.Location.Y + inc_dec_value);
+            if (Working_buton.Location.Y == zero_row * Button_size_wed + Puzzel_padding_top)
+            {
+                Working_buton.ForeColor = Color.FromArgb(51, 153, 255);
+                Swap<Button>(ref Working_buton, ref Array_Buttons[zero_row, zero_col]);
+                zero_row -= 1;
+                TimerBlankDown.Stop();
+                enter = true;
+                DoIt();
+            }
+        }
+        public void InitTimer_For_BlankDown()
+        {
+            Array_Buttons[zero_row - 1, zero_col].ForeColor = Color.FromArgb(230, 0, 0);
+            TimerBlankDown = new Timer();
+            TimerBlankDown.Tick += new EventHandler(TimerBlankDown_Tick);
+            TimerBlankDown.Interval = time_interval_to_move; // in miliseconds
+            TimerBlankDown.Start();
+        }
+
+
+
+        private void TimerBlankRight_Tick(object sender, EventArgs e)
+        {
+            Button Working_buton = Array_Buttons[zero_row, zero_col - 1];
+            Working_buton.Location = new Point(Working_buton.Location.X + inc_dec_value, Working_buton.Location.Y);
+            if (Working_buton.Location.X == zero_col * Button_size_hei + Puzzel_padding_left)
+            {
+                Working_buton.ForeColor = Color.FromArgb(51, 153, 255);
+                Swap<Button>(ref Working_buton, ref Array_Buttons[zero_row, zero_col]);
+                zero_col -= 1;
+                TimerBlankRight.Stop();
+                enter = true;
+                DoIt();
+            }
+        }
+        public void InitTimer_For_BlankRight()
+        {
+            Array_Buttons[zero_row, zero_col - 1].ForeColor = Color.FromArgb(230, 0, 0);
+            TimerBlankRight = new Timer();
+            TimerBlankRight.Tick += new EventHandler(TimerBlankRight_Tick);
+            TimerBlankRight.Interval = time_interval_to_move; // in miliseconds
+            TimerBlankRight.Start();
+        }
+
+
+
+        private void TimerBlankLeft_Tick(object sender, EventArgs e)
+        {
+            Button Working_buton = Array_Buttons[zero_row, zero_col + 1];
+            Working_buton.Location = new Point(Working_buton.Location.X - inc_dec_value, Working_buton.Location.Y);
+            if (Working_buton.Location.X == zero_col * Button_size_hei + Puzzel_padding_left)
+            {
+                Working_buton.ForeColor = Color.FromArgb(51, 153, 255);
+                Swap<Button>(ref Working_buton, ref Array_Buttons[zero_row, zero_col]);
+                zero_col += 1;
+                TimerBlankLeft.Stop();
+                enter = true;
+                DoIt();
+            }
+        }
+        public void InitTimer_For_BlankLeft()
+        {
+            Array_Buttons[zero_row, zero_col + 1].ForeColor = Color.FromArgb(230, 0, 0);
+            TimerBlankLeft = new Timer();
+            TimerBlankLeft.Tick += new EventHandler(TimerBlankLeft_Tick);
+            TimerBlankLeft.Interval = time_interval_to_move; // in miliseconds
+            TimerBlankLeft.Start();
+        }
+       
+
+
+        private void Start_SolvingClick(object sender, EventArgs e)
+        {
+            try
+            {
+                Get_Path.Enabled = false;
+                if (SpeedBox.SelectedItem == null)
+                {
+                    //inc_dec_value = 2;
+                    SpeedBox.SelectedIndex = 0;
+                    inc_dec_value = Convert.ToInt32(SpeedBox.Items[0]);
+                }
+                else { inc_dec_value = int.Parse(SpeedBox.SelectedItem.ToString()); }
+
+
+                DoIt();
+
+                Start_Solving.Text = "Sloving Is Runnig...";
+                Random.Enabled = false;
+            }
+            catch(Exception E)
+            {
+                DialogResult result = MetroMessageBox.Show(this, "You Can't Press Solve when the Puzzle  "+size +" * "+size+"  HAVE A NIZE DAY ", "Attention Required", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+        }
+
+        
+
+        private void Random_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                metroLabel3.Text = " ms";
+                Start_Solving.Enabled = false;
+                path_Display = null;
+                index = 0;
+                enter = true;
+                Path = null;
+                Get_Path.Enabled = true;
+                Path_game.Text = null;
+                Moves.Text = null;
+                count_Random++;
+                PuzzelPanal.Controls.Clear();
+
+                if (FileNameTextBox.Text =="")
+                {
+                    O.AccessCASe(count_Random);
+                }
+                else
+                    O.AccessCASe(count_Random , FileNameTextBox.Text);
+
+                size = O.size;
+                n = size;
+                z = n;
+                arr = new int[size, size];
+                arr = O.BESTARR;
+                Array_Buttons = new Button[size, size];
+                Button_size_wed = (400 / z);
+                Button_size_hei = (400 / z);
+                Avg_size = (Button_size_wed + Button_size_hei) / 2;
+                Button_Font_size = Avg_size / 3;
+                if (size <= 50)
+                {
+                    label1.Enabled = false;
+                    for (int i = 0; i < size; i++)
+                    {
+                        for (int j = 0; j < size; j++)
+                        {
+                            Array_Buttons[i, j] = new Button();
+                            Array_Buttons[i, j].Size = new Size(Button_size_hei, Button_size_wed);
+                            Array_Buttons[i, j].Text = (arr[i, j]).ToString();
+                            Array_Buttons[i, j].ForeColor = Color.FromArgb(51, 153, 255);
+                            Array_Buttons[i, j].Font = new Font(Font.FontFamily, Button_Font_size);
+                            Array_Buttons[i, j].TabStop = false;
+                            Array_Buttons[i, j].Location = new Point(Button_size_hei * j + Puzzel_padding_left, Button_size_wed * i + Puzzel_padding_top);
+                            if (arr[i, j] == 0)
+                            {
+                                zero_row = i;
+                                zero_col = j;
+                            }
+                            else { PuzzelPanal.Controls.Add(Array_Buttons[i, j]); }
+                        }
+                    }
+                }
+                else
+                {
+                    PuzzelPanal.Controls.Add(label1);
+                    Start_Solving.Enabled = false;
+                    label1.Enabled = true;
+                    
+                }
+                SpeedBox.Items.Clear();
+                for (int i = 1; i <= Avg_size; i++)
+                {
+                    if (SpeedBox.Items.Count == 5) { break; }
+                    if (Avg_size % i == 0)
+                    {
+                        SpeedBox.Items.Add((i).ToString());
+                    }
+                }
+                //SpeedBox.Select(0, 0);
+                Start_Solving.Text = "Play Result";
+                NType.Text = (size).ToString() + "X" + (size).ToString();
+            }
+            catch(Exception E)
+            {
+                try
+                {
+                    if (FileNameTextBox.Text != "")
+                    {
+                        string path = @"C:\Copy_the_N_puzzle\Copy_the_N_puzzle\bin\Debug\" + FileNameTextBox.Text;
+                        System.Diagnostics.Process.Start(path);
+                    }
+                    
+                    {
+                        string path = @"C:\Copy_the_N_puzzle\Copy_the_N_puzzle\bin\Debug\TEST.txt";
+                        System.Diagnostics.Process.Start(path);
+                    }
+                    //MessageBox.Show("The File Has End We Back to the Begaining " , "FILE END" , MessageBoxButtons.OKCancel , MessageBoxIcon.Stop);
+                    count_Random = 0;
+                }
+                catch(Exception NewExec)
+                {
+                    MessageBox.Show("Please Copy The File To C  , Thank you for your cooperation", "Warring" , MessageBoxButtons.OK , MessageBoxIcon.Hand);
+                }
+            }
+
+        }
+
+        private void Get_Path_Click(object sender, EventArgs e)
+        {
+
+
+            Path = null;
+            path_Display = null;
+            
+            long timeBefore = System.Environment.TickCount;
+            if (Manhaten.Checked == true && FileNameTextBox.Text == "")
+                Path = O.AStar_SOLVE_using_Mnhaten(count_Random);
+            else if (Manhaten.Checked == true)
+            {
+                Path = O.AStar_SOLVE_using_Mnhaten(count_Random , FileNameTextBox.Text);
+            }
+
+             if (Hamming.Checked == true && FileNameTextBox.Text == "")
+                Path = O.AStar_SOLVE_USing_HAMMing(count_Random);
+             else if (Hamming.Checked == true)
+             {
+                 Path = O.AStar_SOLVE_USing_HAMMing(count_Random, FileNameTextBox.Text);
+             }
+
+
+            long timeAfter = System.Environment.TickCount;
+
+            metroLabel3.Text = (timeAfter - timeBefore).ToString() + " ms " + System.Environment.NewLine + ((timeAfter - timeBefore) / 60000).ToString() + " m";
+            if (Path == null)
+            {
+                //DialogResult result = MetroMessageBox.Show(this, "THIS Is UN SOLVABLE PUZZLE", "Warnning" , MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                MessageForm Ne = new MessageForm();
+                Ne.ShowDialog();
+            }
+            else
+            {
+                Array.Reverse(Path);
+                Path_lenght = Path.Length;
+                for (int j = 0; j < Path.Length; j++)
+                {
+                    path_Display += j + 1 + "-" + Path[j] + System.Environment.NewLine;
+                }
+                Moves.Text = (Path.Length).ToString();
+                Path_game.Text = path_Display;
+                Start_Solving.Enabled = true;
+            }
+
+
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (c == 1)
+            {
+                metroPanel1.Visible = true;
+                metroPanel2.Visible = true;
+                PuzzelPanal.Visible = true;
+                Start_Solving.Visible = true;
+                Get_Path.Visible = true;
+                Random.Visible = true;
+                metroTile1.Visible = true;
+                timer1.Stop();
+                this.BackImage = null;
+            }
+            c++;
+        }
+
+        private void FileNameTextBox_TextChanged(object sender, EventArgs e)
+        {
+            count_Random = 0;
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            ThisWillClosed.Close();
+        }
+    }
+}
