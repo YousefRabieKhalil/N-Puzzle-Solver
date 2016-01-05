@@ -1,0 +1,210 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+namespace Copy_the_N_puzzle
+{
+    class MatrixCLASS
+    {
+        public int[,] MainArr;
+        public int size;
+        public POINT Zero;
+        public string FileName;
+        public int[,] TempArr;
+
+        
+       
+        public void EditMainArr(POINT Cur, POINT New)
+        {
+            int temp = MainArr[Cur.x, Cur.y];
+            MainArr[Cur.x, Cur.y] = MainArr[New.x, New.y];
+            MainArr[New.x, New.y] = temp;
+            SetZeroPosition(New);
+            EditTemp(Cur, New);
+        }
+
+        public void EditTemp(POINT Cur, POINT New)
+        {
+            int temp = TempArr[Cur.x, Cur.y];
+            TempArr[Cur.x, Cur.y] = TempArr[New.x, New.y];
+            TempArr[New.x, New.y] = temp;
+            SetZeroPosition(New);
+        }
+
+        public MatrixCLASS(int SIZE)
+        {
+            size = SIZE;
+            MainArr = new int[SIZE, SIZE];
+            TempArr = new int[SIZE, SIZE];
+        }
+
+        public void SetZeroPosition(POINT P)
+        {
+            Zero = P;
+        }
+
+        public int[] ConvertTo1DArray(int[,] TwoDARR, int N)
+        {
+            int[] NewArray = new int[(N * N) + 1];
+            int Index = 0;
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < N; j++)
+                {
+                    NewArray[Index] = TwoDARR[i, j];
+                    Index++;
+                }
+            }
+            return NewArray;
+        }
+
+        public int[,] GetTempArr(String Move, ref bool change)
+        {
+            POINT New;
+            if (Move == "UP" && Zero.x - 1 != -1)
+            {
+                New = new POINT(Zero.x - 1, Zero.y);
+                EditTemp(Zero, New);
+                change = true;
+            }
+            else if (Move == "DOWN" && Zero.x + 1 != size)
+            {
+                New = new POINT(Zero.x + 1, Zero.y);
+                EditTemp(Zero, New);
+                change = true;
+            }
+            else if (Move == "RIGHT" && Zero.y + 1 != size)
+            {
+                New = new POINT(Zero.x, Zero.y + 1);
+                EditTemp(Zero, New);
+                change = true;
+            }
+            else if (Move == "LEFT" && Zero.y - 1 != -1)
+            {
+                New = new POINT(Zero.x, Zero.y - 1);
+                EditTemp(Zero, New);
+                change = true;
+            }
+            return TempArr;
+        }
+
+        public int read_from_file(int[,] matriax, int Case , string FName)
+        {
+          
+            int size_array = 0;
+            FileName = FName;
+            FileStream SF = new FileStream(FileName, FileMode.OpenOrCreate);
+            StreamReader SR = new StreamReader(SF);
+            try
+            {
+                while (SR.Peek() != -1)
+                {
+                    for (int t = 1; t <= Case; t++)
+                    {
+                        if (SR.Peek() == -1)
+                        {
+                            size_array = 0;
+                            Console.WriteLine("Error in file");
+                            break;
+                        }
+
+                        String line = "";
+                        if (t != 1)
+                        {
+                            line = SR.ReadLine();
+
+                        }
+                        size_array = int.Parse(SR.ReadLine());
+                        SR.ReadLine();
+                        if (t == Case)
+                        {
+                            for (int i = 0; i < size_array; i++)
+                            {
+                                line = SR.ReadLine();
+                                String[] Arr_s = new String[size_array];
+                                int[] Arr_n = new int[size_array];
+                                Arr_s = line.Split(' ');
+                                for (int j = 0; j < size_array; j++)
+                                    Arr_n[j] = int.Parse(Arr_s[j]);
+                                for (int j = 0; j < size_array; j++)
+                                    matriax[i, j] = Arr_n[j];
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < size_array; i++)
+                                line = SR.ReadLine();
+                        }
+                    }
+                    break;
+                }
+                SR.Close();
+                SF.Close();
+                MainArr = new int[size_array, size_array];
+                TempArr = new int[size_array, size_array];
+
+                for (int i = 0; i < size_array; i++)
+                    for (int j = 0; j < size_array; j++)
+                    {
+                        MainArr[i, j] = TempArr[i, j] = matriax[i, j];
+                        if (matriax[i, j] == 0)
+                        {
+                            POINT Z = new POINT(i, j);
+                            SetZeroPosition(Z);
+                        }
+                    }
+
+                size = size_array;
+                return size_array;
+            }
+            catch(Exception E)
+            {
+                SR.Close();
+                return 0;
+
+            }
+        }
+        public void SETMAINARRANDTEMP(int[,] arr)
+        {
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    MainArr[i, j] = arr[i, j];
+                    TempArr[i, j] = arr[i, j];
+                    if (arr[i, j] == 0)
+                    {
+                        POINT zeropp = new POINT(i, j);
+                        SetZeroPosition(zeropp);
+                    }
+                }
+            }
+        }
+        public void SETMainArr(String Move)
+        {
+            POINT New;
+            if (Move == "UP" && Zero.x - 1 != -1)
+            {
+                New = new POINT(Zero.x - 1, Zero.y);
+                EditMainArr(Zero, New);
+            }
+            else if (Move == "DOWN" && Zero.x + 1 != size)
+            {
+                New = new POINT(Zero.x + 1, Zero.y);
+                EditMainArr(Zero, New);
+            }
+            else if (Move == "RIGHT" && Zero.y + 1 != size)
+            {
+                New = new POINT(Zero.x, Zero.y + 1);
+                EditMainArr(Zero, New);
+            }
+            else if (Move == "LEFT" && Zero.y - 1 != -1)
+            {
+                New = new POINT(Zero.x, Zero.y - 1);
+                EditMainArr(Zero, New);
+            }
+        }
+    }
+}
