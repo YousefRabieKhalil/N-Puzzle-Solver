@@ -1,0 +1,62 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Copy_the_N_puzzle
+{
+    class NODE
+    {
+        public int HeuristicValue;
+        public int COSTSOFAR;
+        public int[,] PUZZLE;
+        public int PuzzleSIze;
+        public long TOTAL;
+        public string move = "";
+        public NODE Parent;
+        public NODE()
+        {
+            HeuristicValue = 0;
+            COSTSOFAR = 0;
+            PUZZLE = new int[3, 3];
+        }
+        public NODE(int s)
+        {
+            HeuristicValue = 0;
+            COSTSOFAR = 0;
+            PUZZLE = new int[s, s];
+        }
+        public int[,] getACopy(int[,] COP, int size)
+        {
+            int[,] newcopy = new int[size, size];
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    newcopy[i, j] = COP[i, j];
+                }
+            }
+            return newcopy;
+        }
+        public void EQUAL(NODE X)
+        {
+            // Convert.ToInt32(Math.Sqrt(PUZZLE.Length))
+            HeuristicValue = X.HeuristicValue;
+            PUZZLE = getACopy(X.PUZZLE, X.PuzzleSIze);
+            COSTSOFAR = X.COSTSOFAR;
+            TOTAL = X.TOTAL;
+            move = X.move;
+            Parent = X.Parent;
+            PuzzleSIze = X.PuzzleSIze;
+        }
+        public void calac_Total_using_Hamming()
+        {
+            TOTAL = COSTSOFAR + HeuristicValue;
+        }
+        public void calac_Total_using_Manhateen()
+        {
+            TOTAL = COSTSOFAR + HeuristicValue;
+        }
+    }
+}
