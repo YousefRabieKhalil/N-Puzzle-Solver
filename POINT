@@ -1,0 +1,23 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Copy_the_N_puzzle
+{
+    class POINT
+    {
+        public int x, y;
+        public POINT(int X1, int Y1)
+        {
+            x = X1;
+            y = Y1;
+        }
+        public POINT()
+        {
+            x = -1;
+            y = -1;
+        }
+    }
+}
